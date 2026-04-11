@@ -2,10 +2,28 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const Database = require('better-sqlite3');
+const path = require('path');
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
+
+// Initialize SQLite database
+const dbPath = path.join(__dirname, 'chat.db');
+const db = new Database(dbPath);
+
+console.log(`Database location: ${dbPath}`);
+
+// Create messages table if it doesn't exist
+db.exec(`
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    message TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 
 let users = new Set();
 
@@ -15,21 +33,70 @@ io.on('connection', (socket) => {
   socket.on('join', (username) => {
     users.add(username);
     socket.username = username;
+    
+    // Send chat history (last 100 messages)
+    const history = db.prepare(`
+      SELECT username, message, timestamp 
+      FROM messages 
+      ORDER BY id DESC 
+      LIMIT 100
+    `).all().reverse();
+    
+    socket.emit('history', history.map(row => ({
+      user: row.username,
+      text: row.message,
+      timestamp: row.timestamp
+    })));
+    
     io.emit('userList', Array.from(users));
-    io.emit('message', { user: 'System', text: `${username} joined` });
+    
+    // Save join message
+    const stmt = db.prepare('INSERT INTO messages (username, message) VALUES (?, ?)');
+    stmt.run('System', `${username} joined`);
+    
+    io.emit('message', { 
+      user: 'System', 
+      text: `${username} joined`,
+      timestamp: new Date().toISOString()
+    });
   });
 
   socket.on('message', (msg) => {
-    io.emit('message', { user: socket.username, text: msg });
+    const messageData = {
+      user: socket.username,
+      text: msg,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Save to database
+    const stmt = db.prepare('INSERT INTO messages (username, message) VALUES (?, ?)');
+    stmt.run(socket.username, msg);
+    
+    io.emit('message', messageData);
   });
 
   socket.on('disconnect', () => {
     if (socket.username) {
       users.delete(socket.username);
       io.emit('userList', Array.from(users));
-      io.emit('message', { user: 'System', text: `${socket.username} left` });
+      
+      // Save leave message
+      const stmt = db.prepare('INSERT INTO messages (username, message) VALUES (?, ?)');
+      stmt.run('System', `${socket.username} left`);
+      
+      io.emit('message', {
+        user: 'System',
+        text: `${socket.username} left`,
+        timestamp: new Date().toISOString()
+      });
     }
   });
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  db.close();
+  process.exit(0);
 });
 
 const PORT = process.env.PORT || 3000;
