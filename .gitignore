@@ -2,3 +2,4 @@ chat.db
 node_modules/
 *.log
 .env
+guide.txt
