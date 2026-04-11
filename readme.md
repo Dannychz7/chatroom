@@ -23,7 +23,7 @@ A simple, lightweight chat room application supporting up to 20 concurrent users
 
 ## TODO LIST
 - [] Add a db of some kind to ensure we have persistant logs, etc... 
-    - Implemented Format: 
+    - Implemented Format: Implemted dirty via sqlite, saves history in the directory
 
 ## 🚀 Quick Start (Local Development)
 

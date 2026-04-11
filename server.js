@@ -93,6 +93,54 @@ io.on('connection', (socket) => {
   });
 });
 
+// Middleware to check API key
+function requireApiKey(req, res, next) {
+  const apiKey = req.query.key || req.headers['x-api-key'];
+  const validKey = process.env.API_KEY || 'your-secret-key-here';
+  
+  if (apiKey === validKey) {
+    next(); // Allow access
+  } else {
+    res.status(403).json({ error: 'Forbidden: Invalid API key' });
+  }
+}
+
+// Protected export endpoints
+app.get('/export/json', requireApiKey, (req, res) => {
+  const messages = db.prepare('SELECT * FROM messages ORDER BY id ASC').all();
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', 'attachment; filename=chat-export.json');
+  res.json(messages);
+});
+
+app.get('/export/csv', requireApiKey, (req, res) => {
+  const messages = db.prepare('SELECT * FROM messages ORDER BY id ASC').all();
+  const csv = [
+    'ID,Username,Message,Timestamp',
+    ...messages.map(m => 
+      `${m.id},"${m.username}","${m.message.replace(/"/g, '""')}","${m.timestamp}"`
+    )
+  ].join('\n');
+  
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename=chat-export.csv');
+  res.send(csv);
+});
+
+app.get('/stats', requireApiKey, (req, res) => {
+  const totalMessages = db.prepare('SELECT COUNT(*) as count FROM messages').get();
+  const uniqueUsers = db.prepare('SELECT COUNT(DISTINCT username) as count FROM messages WHERE username != "System"').get();
+  
+  res.json({
+    totalMessages: totalMessages.count,
+    uniqueUsers: uniqueUsers.count,
+    exportUrls: {
+      json: '/export/json?key=YOUR_KEY',
+      csv: '/export/csv?key=YOUR_KEY'
+    }
+  });
+});
+
 // Graceful shutdown
 process.on('SIGINT', () => {
   db.close();
