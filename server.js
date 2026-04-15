@@ -5,6 +5,7 @@ const io = require('socket.io')(http);
 const Database = require('better-sqlite3');
 const path = require('path');
 const Sentiment = require('sentiment');
+const { spawnSync } = require('child_process');
 
 const sentimentAnalyzer = new Sentiment();
 
@@ -13,7 +14,7 @@ app.get('/', (req, res) => {
 });
 
 // Initialize SQLite database
-const dbPath = path.join(__dirname, 'carbrands-TeslaToyotaFord.db');
+const dbPath = path.join(__dirname, 'food-ItalianChineseGreek.db');
 const db = new Database(dbPath);
 
 console.log(`Database location: ${dbPath}`);
@@ -52,6 +53,32 @@ db.exec(`
 // Migrate existing DB: add columns if they don't exist yet
 try { db.exec(`ALTER TABLE messages ADD COLUMN room_id TEXT NOT NULL DEFAULT 'general'`); } catch (e) {}
 try { db.exec(`ALTER TABLE messages ADD COLUMN replying_to INTEGER REFERENCES messages(id)`); } catch (e) {}
+
+// Cache LLM-extracted aspects per message so the LLM is only called once per message
+db.exec(`CREATE TABLE IF NOT EXISTS message_aspects (
+  message_id INTEGER PRIMARY KEY,
+  aspects    TEXT NOT NULL DEFAULT '[]'
+)`);
+
+function getLLMAspects(messageId, messageText) {
+  const cached = db.prepare('SELECT aspects FROM message_aspects WHERE message_id = ?').get(messageId);
+  if (cached) {
+    console.log(`[aspects] msg ${messageId} → cache hit:`, JSON.parse(cached.aspects));
+    return JSON.parse(cached.aspects);
+  }
+
+  console.log(`[aspects] msg ${messageId} → calling LLM: "${messageText.substring(0, 60)}..."`);
+  const result = spawnSync('python3', ['extract.py', messageText], { encoding: 'utf8' });
+  if (result.error) { console.error('❌ Python error:', result.error); return []; }
+  if (result.stderr) console.warn('⚠️ Python:', result.stderr.trim());
+
+  let aspects = [];
+  try { aspects = JSON.parse(result.stdout.trim() || '[]'); } catch { aspects = []; }
+
+  console.log(`[aspects] msg ${messageId} → LLM returned:`, aspects);
+  db.prepare('INSERT OR IGNORE INTO message_aspects (message_id, aspects) VALUES (?, ?)').run(messageId, JSON.stringify(aspects));
+  return aspects;
+}
 
 // room -> Set of usernames
 const roomUsers = new Map();
@@ -286,7 +313,7 @@ const STOPWORDS = new Set([
   'cars','car','electric','vehicles','vehicle','market','brand','brands',
   'going','going','getting','having','being','said','says','saying',
   'guys','people','someone','anyone','everyone','someone','thing','things',
-  'point','side','hear','heard','seen','forget','considering','switching'
+  'point','side','hear','heard','seen','forget','considering','switching', 'find', 'maybe'
 ]);
 
 app.get('/analytics', (req, res) => {
@@ -373,13 +400,11 @@ const rawClauses = row.message.split(clauseSplitter);
       }
     }
 
-    const words = row.message.toLowerCase().match(/\b[a-z]{4,}\b/g) || [];
-    const isRecent = recentIds.has(row.id);
-    words.forEach(w => {
-      if (!STOPWORDS.has(w) && !optLower.includes(w)) {
-        aspectMap[w] = (aspectMap[w] || 0) + 1;
-        if (isRecent) recentAspects.add(w);
-      }
+    // Aspects via LLM only (cached after first call)
+    const aspects = getLLMAspects(row.id, row.message);
+    aspects.forEach(a => {
+      aspectMap[a] = (aspectMap[a] || 0) + 1;
+      if (recentIds.has(row.id)) recentAspects.add(a);
     });
   });
 
