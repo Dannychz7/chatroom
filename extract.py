@@ -9,20 +9,20 @@ import os
 # ── LLM Backend — uncomment ONE block ────────────────────────────────────────
 
 # --- Ollama (local) ---
-import ollama
-MODEL = "codellama:13b"
+# import ollama
+# MODEL = "codellama:13b"
 
 # --- Anthropic / Claude ---
-# import anthropic, os
-# from dotenv import load_dotenv
-# load_dotenv()
-# api_key = os.getenv('pref-llm-key')
+import anthropic, os
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.getenv('pref-llm-key')
 
-# if not api_key:
-#     raise ValueError("CRITICAL: 'pref-llm-key' not found. Check your .env file!")
+if not api_key:
+    raise ValueError("CRITICAL: 'pref-llm-key' not found. Check your .env file!")
 
-# client = anthropic.Anthropic(api_key=api_key)
-# MODEL = "claude-haiku-4-5-20251001"
+client = anthropic.Anthropic(api_key=api_key)
+MODEL = "claude-haiku-4-5-20251001"
 
 # ─────────────────────────────────────────────────────────────────────────────
 DATA_PATH       = "all_data_files/experiments/data.csv"
@@ -110,16 +110,16 @@ def query_ollama(sentence):
     prompt = PROMPT_TEMPLATE.format(sentence=sentence)
 
     # --- Ollama ---
-    response = ollama.chat(model=MODEL, messages=[{"role": "user", "content": prompt}])
-    return response["message"]["content"]
+    # response = ollama.chat(model=MODEL, messages=[{"role": "user", "content": prompt}])
+    # return response["message"]["content"]
 
     # --- Anthropic / Claude ---
-    # response = client.messages.create(
-    #     model=MODEL,
-    #     max_tokens=256,
-    #     messages=[{"role": "user", "content": prompt}]
-    # )
-    # return response.content[0].text
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=256,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.content[0].text
 
 
 def parse_aspects(response_text, object_a, object_b):

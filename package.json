@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
+    "postinstall": "pip install -r requirements.txt",
     "start": "node server.js"
   },
   "dependencies": {
