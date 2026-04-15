@@ -16,7 +16,7 @@ import os
 import anthropic, os
 from dotenv import load_dotenv
 load_dotenv()
-api_key = os.getenv('pref-llm-key')
+api_key = os.getenv('pref_llm_key')
 
 if not api_key:
     raise ValueError("CRITICAL: 'pref-llm-key' not found. Check your .env file!")

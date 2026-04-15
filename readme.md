@@ -35,6 +35,12 @@ A simple, lightweight chat room application supporting up to 20 concurrent users
 - [x] importing CSV, basically, forum will work like this: We will create that dataset offline with users, topics, and replies, etc..., via csv (ensure we have who replied to who to show it), and then simulate as if they are the humans joining, and so full stack will have current standings being updated, graph adding notes and edges to it, and then of couse the chat room itself..
     - [x] the CSV should have the 10 users, 3 to 4 responses each, 3, 4, 5 options, choose whichever data set looks best
 
+## BUGS:
+⚠️ Python: Traceback (most recent call last):
+  File "/opt/render/project/src/extract.py", line 22, in <module>
+    raise ValueError("CRITICAL: 'pref-llm-key' not found. Check your .env file!")
+ValueError: CRITICAL: 'pref-llm-key' not found. Check your .env file!
+[aspects] msg 45 → LLM returned: []
 ## Quick Start (Local Development)
 
 ### Prerequisites
