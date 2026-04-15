@@ -1,9 +1,0 @@
-ID,Username,Message,Timestamp
-1,"System","admin joined","2026-04-11 19:27:39"
-2,"System","user1 joined","2026-04-11 19:27:59"
-3,"System","admin left","2026-04-11 19:28:03"
-4,"user1","Retry","2026-04-11 19:28:07"
-5,"System","admin joined","2026-04-11 19:28:12"
-6,"admin","Hey i'm the admin","2026-04-11 19:28:16"
-7,"admin","I like apple more than pear","2026-04-11 19:28:27"
-8,"user1","I do too : ) ","2026-04-11 19:28:32"

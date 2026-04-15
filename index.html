@@ -6,167 +6,1012 @@
   <title>Chat Room</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
+    body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
+      background: #1a1d23;
       height: 100vh;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      overflow: hidden;
     }
-    .container {
-      width: 90%;
-      max-width: 800px;
-      height: 90vh;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    /* ════════════════════════════════
+       LEFT PANEL — Chat
+    ════════════════════════════════ */
+    #chatPanel {
+      width: 50%;
+      min-width: 320px;
       display: flex;
       flex-direction: column;
+      border-right: 1px solid #2e3340;
     }
-    .header {
-      padding: 20px;
-      border-bottom: 1px solid #e0e0e0;
-      background: #4a90e2;
-      color: white;
-      border-radius: 12px 12px 0 0;
+
+    .chat-header {
+      padding: 14px 18px;
+      background: #252933;
+      border-bottom: 1px solid #2e3340;
+      flex-shrink: 0;
     }
-    .header h1 { font-size: 24px; margin-bottom: 8px; }
-    .users { font-size: 14px; opacity: 0.9; }
+    .chat-header h1 { font-size: 18px; color: #e2e8f0; font-weight: 700; }
+    .chat-header-sub { font-size: 12px; color: #8896a5; margin-top: 3px; display: flex; gap: 14px; }
+    .chat-header-sub strong { color: #a8b9cc; }
+
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
-      background: #fafafa;
+      padding: 14px 16px;
+      background: #1e2128;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-thumb { background: #3a4050; border-radius: 4px; }
+
     .message {
-      margin-bottom: 12px;
-      padding: 10px 14px;
+      padding: 9px 13px;
       border-radius: 8px;
-      background: white;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      background: #252933;
+      position: relative;
+      word-break: break-word;
     }
-    .message .user {
-      font-weight: 600;
-      color: #4a90e2;
-      margin-right: 8px;
-    }
-    .message .time {
-      font-size: 11px;
-      color: #999;
-      margin-left: 8px;
-    }
+    .message:hover .reply-btn { opacity: 1; }
+    .message .user { font-weight: 700; color: #5b9cf6; margin-right: 6px; font-size: 13px; }
+    .message .msg-text { font-size: 14px; color: #d1dae6; }
+    .message .time { font-size: 10px; color: #4a5568; margin-left: 6px; }
     .message.system {
-      background: #e3f2fd;
-      color: #1976d2;
+      background: transparent;
+      color: #4a5568;
       text-align: center;
       font-style: italic;
+      font-size: 12px;
     }
+
+    .reply-quote {
+      background: #1a1d23;
+      border-left: 3px solid #5b9cf6;
+      border-radius: 4px;
+      padding: 4px 9px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .reply-quote .rq-user { font-weight: 700; color: #5b9cf6; margin-right: 4px; }
+    .reply-quote .rq-text { color: #6b7a8d; }
+
+    .reply-btn {
+      opacity: 0;
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      background: #1e2128;
+      border: 1px solid #3a4050;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 11px;
+      color: #6b7a8d;
+      cursor: pointer;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .reply-btn:hover { color: #5b9cf6; border-color: #5b9cf6; }
+
+    #replyBar {
+      display: none;
+      align-items: center;
+      padding: 7px 16px;
+      background: #1f2535;
+      border-top: 1px solid #2e3a52;
+      font-size: 12px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    #replyBar.visible { display: flex; }
+    #replyBar .rb-label { font-weight: 700; color: #5b9cf6; white-space: nowrap; }
+    #replyBar .rb-text { flex: 1; color: #6b7a8d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #replyBar .rb-cancel { background: none; border: none; color: #4a5568; font-size: 15px; cursor: pointer; }
+    #replyBar .rb-cancel:hover { color: #e74c3c; }
+
     .input-area {
       display: flex;
-      gap: 10px;
-      padding: 20px;
-      border-top: 1px solid #e0e0e0;
-    }
-    input {
-      flex: 1;
+      gap: 8px;
       padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 24px;
+      background: #252933;
+      border-top: 1px solid #2e3340;
+      flex-shrink: 0;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 10px 14px;
+      background: #1e2128;
+      border: 1px solid #3a4050;
+      border-radius: 20px;
+      color: #d1dae6;
       font-size: 14px;
       outline: none;
       transition: border-color 0.2s;
     }
-    input:focus { border-color: #4a90e2; }
-    button {
-      padding: 12px 24px;
-      background: #4a90e2;
+    .input-area input::placeholder { color: #4a5568; }
+    .input-area input:focus { border-color: #5b9cf6; }
+    .input-area input:disabled { opacity: 0.4; }
+    .send-btn {
+      padding: 10px 20px;
+      background: #5b9cf6;
       color: white;
       border: none;
-      border-radius: 24px;
-      font-weight: 600;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 13px;
       cursor: pointer;
       transition: background 0.2s;
     }
-    button:hover { background: #357abd; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
+    .send-btn:hover { background: #3a7de0; }
+    .send-btn:disabled { background: #2e3340; color: #4a5568; cursor: not-allowed; }
+
+    /* ════════════════════════════════
+       RIGHT PANEL — Three sections
+    ════════════════════════════════ */
+    #rightPanel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* ── Alternatives ── */
+    #alternativesPanel {
+      background: #252933;
+      border-bottom: 1px solid #2e3340;
+      padding: 14px 18px;
+      flex-shrink: 0;
+    }
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4a5568;
+      margin-bottom: 10px;
+    }
+    .alternatives-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .alt-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1.5px solid #3a4050;
+      background: #1e2128;
+      font-size: 13px;
+      color: #a8b9cc;
+      cursor: default;
+      transition: border-color 0.2s;
+    }
+    .alt-chip:hover { border-color: #5b9cf6; color: #d1dae6; }
+    .alt-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Standings ── */
+    #standingsPanel {
+      background: #1e2128;
+      border-bottom: 1px solid #2e3340;
+      padding: 14px 18px;
+      flex-shrink: 0;
+    }
+    .standings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .standing-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .standing-rank {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4a5568;
+      width: 24px;
+      text-align: right;
+    }
+    .standing-rank.gold   { color: #f6c05b; }
+    .standing-rank.silver { color: #a0aec0; }
+    .standing-rank.bronze { color: #c08b5b; }
+    .standing-name {
+      flex: 1;
+      font-size: 13px;
+      color: #d1dae6;
+      font-weight: 600;
+    }
+    .standing-bar-wrap {
+      width: 90px;
+      height: 6px;
+      background: #2e3340;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .standing-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s;
+    }
+    .standing-score {
+      font-size: 12px;
+      font-weight: 700;
+      width: 36px;
+      text-align: right;
+    }
+
+    /* ── Graph ── */
+/* Replace the #graphPanel block with this: */
+    #graphPanel {
+      flex: 1;
+      background: #1a1d23;
+      padding: 14px 18px 14px 18px;
+      display: flex;
+      flex-direction: column;
+      min-height: 120px;
+      overflow: hidden;
+    }
+    #graphCanvas {
+      flex: 1;
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+    }
+
+    /* ── Aspects ── */
+    #aspectsPanel {
+      background: #252933;
+      border-top: 1px solid #2e3340;
+      padding: 12px 18px;
+      flex-shrink: 0;
+      max-height: 140px;
+      display: flex;
+      flex-direction: column;
+    }
+    #aspectsPanel .panel-title { margin-bottom: 8px; }
+    .aspects-scroll {
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-content: flex-start;
+    }
+    .aspects-scroll::-webkit-scrollbar { width: 3px; }
+    .aspects-scroll::-webkit-scrollbar-thumb { background: #3a4050; border-radius: 3px; }
+    .aspect-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: #1e2128;
+      border: 1px solid #3a4050;
+      font-size: 12px;
+      color: #a8b9cc;
+      transition: border-color 0.2s;
+      animation: fadeIn 0.25s ease;
+    }
+    .aspect-chip.new { border-color: #5b9cf6; color: #d1dae6; }
+    .aspect-chip .aspect-count {
+      background: #2e3340;
+      border-radius: 8px;
+      padding: 1px 5px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #6b7a8d;
+    }
+    .aspect-chip.new .aspect-count { background: #1e3a5f; color: #5b9cf6; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.88); } to { opacity: 1; transform: scale(1); } }
+
+    /* ════════════════════════════════
+       JOIN MODAL
+    ════════════════════════════════ */
+    #joinModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    #joinModal.hidden { display: none; }
+    .join-box {
+      background: #252933;
+      border-radius: 12px;
+      padding: 30px 26px;
+      width: 320px;
+      border: 1px solid #2e3340;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+    .join-box h2 { color: #e2e8f0; font-size: 20px; margin-bottom: 20px; }
+    .join-box label { display: block; font-size: 12px; font-weight: 700; color: #6b7a8d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .join-box input {
+      width: 100%;
+      padding: 10px 13px;
+      background: #1e2128;
+      border: 1px solid #3a4050;
+      border-radius: 7px;
+      color: #d1dae6;
+      font-size: 14px;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .join-box input:focus { border-color: #5b9cf6; }
+    .join-hint { font-size: 11px; color: #4a5568; margin-top: -10px; margin-bottom: 14px; }
+    .join-box .join-submit {
+      width: 100%;
+      padding: 11px;
+      background: #5b9cf6;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .join-box .join-submit:hover { background: #3a7de0; }
+
+    /* ── Recent Rooms dropdown ── */
+    .recent-rooms-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #4a5568;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    #recentRoomsSelect {
+      width: 100%;
+      padding: 9px 12px;
+      background: #1e2128;
+      border: 1px solid #3a4050;
+      border-radius: 7px;
+      color: #a8b9cc;
+      font-size: 13px;
+      margin-bottom: 14px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234a5568' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    #recentRoomsSelect:focus { border-color: #5b9cf6; }
+    #recentRoomsSelect option { background: #252933; color: #d1dae6; }
+    #recentRoomsSelect option:disabled { color: #4a5568; }
+    #recentRoomsWrap { display: none; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>💬 Chat Room</h1>
-      <div class="users">Online: <span id="userList">0</span></div>
+
+  <!-- Join Modal -->
+  <div id="joinModal">
+    <div class="join-box">
+      <h2>💬 Join Chat</h2>
+      <label for="usernameInput">Your Name</label>
+      <input type="text" id="usernameInput" placeholder="e.g. Alice" autocomplete="off" />
+      <label for="roomInput">Room</label>
+      <input type="text" id="roomInput" placeholder="e.g. general" autocomplete="off" />
+      <p class="join-hint" id="roomHint"></p>
+      <div id="recentRoomsWrap">
+        <span class="recent-rooms-label">Recent Rooms</span>
+        <select id="recentRoomsSelect">
+          <option value="" disabled selected>— pick a room —</option>
+        </select>
+      </div>
+      <button class="join-submit" id="joinBtn">Join Room</button>
+    </div>
+  </div>
+
+  <!-- ── Left: Chat ── -->
+  <div id="chatPanel">
+    <div class="chat-header">
+      <h1 id="roomTitle">💬 Chat Room</h1>
+      <div class="chat-header-sub">
+        <span>Room: <strong id="roomLabel">—</strong></span>
+        <span>Online: <span id="userList">—</span></span>
+      </div>
     </div>
     <div id="messages"></div>
-    <div class="input-area">
-      <input id="input" placeholder="Type a message..." disabled>
-      <button id="send" disabled>Send</button>
+    <div id="replyBar">
+      <span class="rb-label">↩ <span id="replyUser"></span>:</span>
+      <span class="rb-text" id="replyPreview"></span>
+      <button class="rb-cancel" id="cancelReply">✕</button>
     </div>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Type a message..." disabled />
+      <button class="send-btn" id="sendBtn" disabled>Send</button>
+    </div>
+  </div>
+
+  <!-- ── Right: Alternatives + Standings + Graph ── -->
+  <div id="rightPanel">
+
+    <!-- Alternatives -->
+    <div id="alternativesPanel">
+      <div class="panel-title" id="altPanelTitle">Alternatives</div>
+      <div class="alternatives-grid" id="altGrid"></div>
+    </div>
+
+    <!-- Standings -->
+    <div id="standingsPanel">
+      <div class="panel-title">Current Standings</div>
+      <div class="standings-list" id="standingsList"></div>
+    </div>
+
+    <!-- Graph -->
+    <div id="graphPanel">
+      <div class="panel-title">Comparison Graph</div>
+      <!-- <canvas id="graphCanvas"></canvas> -->
+    </div>
+
+    <!-- Aspects -->
+    <div id="aspectsPanel">
+      <div class="panel-title">Aspects Mentioned</div>
+      <div class="aspects-scroll" id="aspectsGrid"></div>
+    </div>
+
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io();
-    const messagesDiv = document.getElementById('messages');
-    const input = document.getElementById('input');
-    const sendBtn = document.getElementById('send');
-    const userListSpan = document.getElementById('userList');
+    // ══════════════════════════════════════════
+    //  LIVE DATA — populated from /config and /analytics
+    // ══════════════════════════════════════════
+    let ALTERNATIVES = [];   // { id, label, color }
+    let EDGES        = [];   // { a, b, weight }
+    let SCORES       = {};   // { id: number }
+    let ASPECTS      = [];   // { label, count, isNew }
 
-    const username = prompt('Enter your username:');
-    if (!username) {
-      alert('Username required!');
-      location.reload();
-    } else {
-      socket.emit('join', username);
-      input.disabled = false;
-      sendBtn.disabled = false;
-      input.focus();
+    let p5inst = null;  // set after p5 sketch initialises
+
+    // ══════════════════════════════════════════
+    //  HELPERS
+    // ══════════════════════════════════════════
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function getAlt(id) { return ALTERNATIVES.find(a => a.id === id); }
+
+    // ══════════════════════════════════════════
+    //  ALTERNATIVES PANEL
+    // ══════════════════════════════════════════
+    function renderAlternatives() {
+      const grid = document.getElementById('altGrid');
+      grid.innerHTML = ALTERNATIVES.map(alt => `
+        <div class="alt-chip">
+          <span class="alt-dot" style="background:${alt.color}"></span>
+          <span>${esc(alt.label)}</span>
+        </div>
+      `).join('');
     }
 
-    // Display message helper function
+    // ══════════════════════════════════════════
+    //  STANDINGS PANEL
+    // ══════════════════════════════════════════
+    function scoreColor(s) {
+      if (s > 0) return '#5bf6a0';
+      if (s < 0) return '#f6875b';
+      return '#6b7a8d';
+    }
+    function renderStandings() {
+      const sorted = [...ALTERNATIVES]
+        .map(a => ({ ...a, score: SCORES[a.id] ?? 0 }))
+        .sort((x, y) => y.score - x.score);
+
+      const maxAbs = Math.max(...sorted.map(a => Math.abs(a.score)), 1);
+      const rankLabels = ['1st','2nd','3rd'];
+      const rankClasses = ['gold','silver','bronze'];
+
+      document.getElementById('standingsList').innerHTML = sorted.map((alt, i) => {
+        const rankLabel = rankLabels[i] || `${i+1}th`;
+        const rankClass = rankClasses[i] || '';
+        const barPct = Math.round((alt.score + maxAbs) / (2 * maxAbs) * 100);
+        const scoreStr = alt.score > 0 ? `+${alt.score}` : `${alt.score}`;
+        return `
+          <div class="standing-row">
+            <span class="standing-rank ${rankClass}">${rankLabel}</span>
+            <span class="alt-dot" style="background:${alt.color};width:8px;height:8px;border-radius:50%;flex-shrink:0"></span>
+            <span class="standing-name">${esc(alt.label)}</span>
+            <div class="standing-bar-wrap">
+              <div class="standing-bar" style="width:${barPct}%;background:${scoreColor(alt.score)}"></div>
+            </div>
+            <span class="standing-score" style="color:${scoreColor(alt.score)}">${scoreStr}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ══════════════════════════════════════════
+    //  COMPARISON GRAPH
+    // ══════════════════════════════════════════
+    // const canvas = document.getElementById('graphCanvas');
+    // const ctx = canvas.getContext('2d');
+
+    // function resizeCanvas() {
+    //   const panel = document.getElementById('graphPanel');
+    //   const titleH = panel.querySelector('.panel-title').offsetHeight + 14;
+    //   canvas.width  = panel.clientWidth  - 36;   // padding 18*2
+    //   canvas.height = panel.clientHeight - titleH - 14;
+    //   drawGraph();
+    // }
+
+    // function nodePositions() {
+    //   const n = ALTERNATIVES.length;
+    //   const cx = canvas.width  / 2;
+    //   const cy = canvas.height / 2;
+    //   const r  = Math.min(cx, cy) * 0.62;
+    //   return ALTERNATIVES.map((alt, i) => {
+    //     const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    //     return {
+    //       ...alt,
+    //       x: cx + r * Math.cos(angle),
+    //       y: cy + r * Math.sin(angle),
+    //       score: SCORES[alt.id] ?? 0
+    //     };
+    //   });
+    // }
+
+    // function drawGraph() {
+    //   if (!canvas.width || !canvas.height) return;
+    //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    //   const nodes = nodePositions();
+    //   const byId  = Object.fromEntries(nodes.map(n => [n.id, n]));
+
+    //   // Draw edges first (behind nodes)
+    //   EDGES.forEach(edge => {
+    //     const src = byId[edge.a];
+    //     const dst = byId[edge.b];
+    //     if (!src || !dst) return;
+
+    //     const alpha = Math.min(0.2 + edge.weight * 0.15, 0.85);
+    //     const lw    = 1 + edge.weight * 0.5;
+
+    //     ctx.beginPath();
+    //     ctx.moveTo(src.x, src.y);
+    //     ctx.lineTo(dst.x, dst.y);
+    //     ctx.strokeStyle = `rgba(91,156,246,${alpha})`;
+    //     ctx.lineWidth = lw;
+    //     ctx.stroke();
+
+    //     // Weight label at midpoint
+    //     const mx = (src.x + dst.x) / 2;
+    //     const my = (src.y + dst.y) / 2;
+    //     ctx.fillStyle = `rgba(91,156,246,${alpha})`;
+    //     ctx.font = '10px system-ui';
+    //     ctx.textAlign = 'center';
+    //     ctx.textBaseline = 'middle';
+    //     if (edge.weight > 1) ctx.fillText(`×${edge.weight}`, mx, my);
+    //   });
+
+    //   // Draw node glow + circle
+    //   const nodeR = Math.max(20, Math.min(canvas.width, canvas.height) * 0.06);
+    //   nodes.forEach(node => {
+    //     // Glow
+    //     const grd = ctx.createRadialGradient(node.x, node.y, nodeR * 0.5, node.x, node.y, nodeR * 1.6);
+    //     grd.addColorStop(0, node.color + '33');
+    //     grd.addColorStop(1, 'transparent');
+    //     ctx.beginPath();
+    //     ctx.arc(node.x, node.y, nodeR * 1.6, 0, 2 * Math.PI);
+    //     ctx.fillStyle = grd;
+    //     ctx.fill();
+
+    //     // Circle fill
+    //     ctx.beginPath();
+    //     ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI);
+    //     ctx.fillStyle = '#1e2128';
+    //     ctx.fill();
+    //     ctx.strokeStyle = node.color;
+    //     ctx.lineWidth = 2;
+    //     ctx.stroke();
+
+    //     // ID letter
+    //     ctx.fillStyle = node.color;
+    //     ctx.font = `bold ${Math.round(nodeR * 0.65)}px system-ui`;
+    //     ctx.textAlign = 'center';
+    //     ctx.textBaseline = 'middle';
+    //     ctx.fillText(node.id, node.x, node.y);
+
+    //     // Label below node
+    //     const labelY = node.y + nodeR + 13;
+    //     ctx.fillStyle = '#a8b9cc';
+    //     ctx.font = `${Math.round(nodeR * 0.45)}px system-ui`;
+    //     ctx.textAlign = 'center';
+    //     ctx.textBaseline = 'top';
+    //     ctx.fillText(node.label, node.x, labelY);
+
+    //     // Score badge (top-right of node)
+    //     const s = node.score;
+    //     const scoreStr = s > 0 ? `+${s}` : `${s}`;
+    //     const badgeX = node.x + nodeR * 0.72;
+    //     const badgeY = node.y - nodeR * 0.72;
+    //     ctx.beginPath();
+    //     ctx.arc(badgeX, badgeY, nodeR * 0.38, 0, 2 * Math.PI);
+    //     ctx.fillStyle = s > 0 ? '#1a3d2a' : s < 0 ? '#3d1a1a' : '#2a2a3d';
+    //     ctx.fill();
+    //     ctx.strokeStyle = scoreColor(s);
+    //     ctx.lineWidth = 1;
+    //     ctx.stroke();
+    //     ctx.fillStyle = scoreColor(s);
+    //     ctx.font = `bold ${Math.round(nodeR * 0.32)}px system-ui`;
+    //     ctx.textAlign = 'center';
+    //     ctx.textBaseline = 'middle';
+    //     ctx.fillText(scoreStr, badgeX, badgeY);
+    //   });
+    // }
+
+    // function scoreColor(s) {
+    //   if (s > 0) return '#5bf6a0';
+    //   if (s < 0) return '#f6875b';
+    //   return '#6b7a8d';
+    // }
+
+    // // Resize canvas whenever the panel size changes
+    // const ro = new ResizeObserver(resizeCanvas);
+    // ro.observe(document.getElementById('graphPanel'));
+
+    // ══════════════════════════════════════════
+//  COMPARISON GRAPH — p5.js
+// ══════════════════════════════════════════
+const graphPanel = document.getElementById('graphPanel');
+
+const sketch = (p) => {
+  let nodes = [];
+
+  function scoreColor(s) {
+    if (s > 0) return p.color('#5bf6a0');
+    if (s < 0) return p.color('#f6875b');
+    return p.color('#6b7a8d');
+  }
+
+  function buildNodes() {
+    const n = ALTERNATIVES.length;
+    const cx = p.width  / 2;
+    const cy = p.height / 2;
+    const r  = Math.min(cx, cy) * 0.62;
+    nodes = ALTERNATIVES.map((alt, i) => {
+      const angle = (p.TWO_PI * i / n) - p.HALF_PI;
+      return {
+        ...alt,
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle),
+        score: SCORES[alt.id] ?? 0
+      };
+    });
+  }
+
+  // p.setup = () => {
+  //   const titleH = graphPanel.querySelector('.panel-title').offsetHeight + 14;
+  //   const w = graphPanel.clientWidth  - 36;
+  //   const h = graphPanel.clientHeight - titleH - 14;
+  //   const cnv = p.createCanvas(w, h);
+  //   cnv.parent('graphPanel');
+  //   // Remove default margin p5 adds
+  //   cnv.elt.style.display = 'block';
+  //   buildNodes();
+  //   p.noLoop(); // static — redraw() called on resize
+  // };
+
+  p.setup = () => {
+  const titleH = graphPanel.querySelector('.panel-title').offsetHeight + 14;
+  const w = graphPanel.clientWidth - 36;
+  const h = graphPanel.clientHeight - titleH - 14;
+  const cnv = p.createCanvas(w, h);
+  cnv.parent('graphPanel');
+  cnv.elt.style.display = 'block';
+  cnv.elt.style.margin = '0';        // ← kills p5's default margin
+  cnv.elt.style.borderRadius = '8px';
+  buildNodes();
+  p.noLoop();
+};
+
+  p.draw = () => {
+    buildNodes();  // rebuild from current ALTERNATIVES / SCORES on every redraw
+    p.clear();
+    p.background('#1a1d23');
+
+    const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
+    const nodeR = Math.max(20, Math.min(p.width, p.height) * 0.06);
+
+    // ── Edges ──
+    EDGES.forEach(edge => {
+      const src = byId[edge.a];
+      const dst = byId[edge.b];
+      if (!src || !dst) return;
+
+      const alpha = Math.min(51 + edge.weight * 38, 217); // 0-255
+      const lw    = 1 + edge.weight * 0.5;
+
+      p.stroke(91, 156, 246, alpha);
+      p.strokeWeight(lw);
+      p.line(src.x, src.y, dst.x, dst.y);
+
+      // Weight label at midpoint
+      if (edge.weight > 1) {
+        const mx = (src.x + dst.x) / 2;
+        const my = (src.y + dst.y) / 2;
+        p.noStroke();
+        p.fill(91, 156, 246, alpha);
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textSize(10);
+        p.text(`×${edge.weight}`, mx, my);
+      }
+    });
+
+    // ── Nodes ──
+    nodes.forEach(node => {
+      const c = p.color(node.color);
+
+      // Glow ring
+      const glowR = nodeR * 1.6;
+      for (let i = 0; i < 8; i++) {
+        const t   = i / 8;
+        const a   = p.lerp(60, 0, t);
+        const cr  = p.red(c), cg = p.green(c), cb = p.blue(c);
+        p.noStroke();
+        p.fill(cr, cg, cb, a);
+        p.circle(node.x, node.y, (glowR * 2) * (1 - t * 0.4));
+      }
+
+      // Circle
+      p.fill('#1e2128');
+      p.stroke(node.color);
+      p.strokeWeight(2);
+      p.circle(node.x, node.y, nodeR * 2);
+
+      // ID letter
+      p.noStroke();
+      p.fill(node.color);
+      p.textAlign(p.CENTER, p.CENTER);
+      p.textStyle(p.BOLD);
+      p.textSize(nodeR * 0.65);
+      p.text(node.id, node.x, node.y);
+
+      // Label below
+      p.textStyle(p.NORMAL);
+      p.fill('#a8b9cc');
+      p.textSize(nodeR * 0.45);
+      p.textAlign(p.CENTER, p.TOP);
+      p.text(node.label, node.x, node.y + nodeR + 5);
+
+      // Score badge
+      const s = node.score;
+      const scoreStr = s > 0 ? `+${s}` : `${s}`;
+      const bx = node.x + nodeR * 0.72;
+      const by = node.y - nodeR * 0.72;
+      const br = nodeR * 0.38;
+
+      p.fill(s > 0 ? '#1a3d2a' : s < 0 ? '#3d1a1a' : '#2a2a3d');
+      p.stroke(scoreColor(s));
+      p.strokeWeight(1);
+      p.circle(bx, by, br * 2);
+
+      p.noStroke();
+      p.fill(scoreColor(s));
+      p.textAlign(p.CENTER, p.CENTER);
+      p.textStyle(p.BOLD);
+      p.textSize(nodeR * 0.32);
+      p.text(scoreStr, bx, by);
+    });
+  };
+
+  p.windowResized = () => {
+    const titleH = graphPanel.querySelector('.panel-title').offsetHeight + 14;
+    const w = graphPanel.clientWidth  - 36;
+    const h = graphPanel.clientHeight - titleH - 14;
+    p.resizeCanvas(w, h);
+    buildNodes();
+    p.redraw();
+  };
+};
+
+p5inst = new p5(sketch);
+
+    // ══════════════════════════════════════════
+    //  Alternatives
+    // ══════════════════════════════════════════
+    function renderAspects() {
+      const sorted = [...ASPECTS].sort((a, b) => b.count - a.count);
+      document.getElementById('aspectsGrid').innerHTML = sorted.map(asp => `
+        <div class="aspect-chip ${asp.isNew ? 'new' : ''}">
+          <span>${esc(asp.label)}</span>
+          <span class="aspect-count">${asp.count}</span>
+        </div>
+      `).join('');
+    }
+
+    // ══════════════════════════════════════════
+    //  CHAT
+    // ══════════════════════════════════════════
+    const socket = io();
+    const joinModal     = document.getElementById('joinModal');
+    const usernameInput = document.getElementById('usernameInput');
+    const roomInput     = document.getElementById('roomInput');
+    const roomHint      = document.getElementById('roomHint');
+    const joinBtn       = document.getElementById('joinBtn');
+    const messagesDiv   = document.getElementById('messages');
+    const msgInput      = document.getElementById('msgInput');
+    const sendBtn       = document.getElementById('sendBtn');
+    const userListSpan  = document.getElementById('userList');
+    const roomLabel     = document.getElementById('roomLabel');
+    const roomTitle     = document.getElementById('roomTitle');
+    const replyBar      = document.getElementById('replyBar');
+    const replyUserSpan = document.getElementById('replyUser');
+    const replyPreview  = document.getElementById('replyPreview');
+    const cancelReply   = document.getElementById('cancelReply');
+
+    let replyingTo  = null;
+    let defaultRoom = 'general';  // overwritten by fetchConfig
+
+    function getLastRoom(u)     { return localStorage.getItem('lastRoom_' + u) || ''; }
+    function saveLastRoom(u, r) { localStorage.setItem('lastRoom_' + u, r); }
+
+    usernameInput.addEventListener('input', () => {
+      const saved = getLastRoom(usernameInput.value.trim());
+      if (saved) {
+        roomInput.value = saved;
+        roomHint.textContent = `Last room: "${saved}"`;
+      } else {
+        roomHint.textContent = '';
+        if (!roomInput.value) roomInput.value = defaultRoom;
+      }
+    });
+
+    joinBtn.addEventListener('click', doJoin);
+    [usernameInput, roomInput].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); }));
+
+    function doJoin() {
+      const username = usernameInput.value.trim();
+      const room = roomInput.value.trim() || defaultRoom;
+      if (!username) { usernameInput.focus(); return; }
+      saveLastRoom(username, room);
+      joinModal.classList.add('hidden');
+      roomLabel.textContent = room;
+      roomTitle.textContent = '💬 ' + room;
+      msgInput.disabled = false;
+      sendBtn.disabled = false;
+      msgInput.focus();
+      socket.emit('join', { username, room });
+    }
+
+    function setReply(id, user, text) {
+      replyingTo = { id, user, text };
+      replyUserSpan.textContent = esc(user);
+      replyPreview.textContent = text.length > 80 ? text.slice(0, 80) + '…' : text;
+      replyBar.classList.add('visible');
+      msgInput.focus();
+    }
+    function clearReply() { replyingTo = null; replyBar.classList.remove('visible'); }
+    cancelReply.addEventListener('click', clearReply);
+
     function displayMessage(data) {
       const div = document.createElement('div');
-      div.className = data.user === 'System' ? 'message system' : 'message';
-      
-      const time = new Date(data.timestamp).toLocaleTimeString();
-      
       if (data.user === 'System') {
+        div.className = 'message system';
         div.textContent = data.text;
-      } else {
-        div.innerHTML = `<span class="user">${data.user}:</span>${data.text} <span class="time">${time}</span>`;
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return;
+      }
+      div.className = 'message';
+      const time = new Date(data.timestamp).toLocaleTimeString();
+      let inner = '';
+      if (data.replying_to && data.reply_user) {
+        const preview = data.reply_text
+          ? (data.reply_text.length > 60 ? data.reply_text.slice(0, 60) + '…' : data.reply_text)
+          : '';
+        inner += `<div class="reply-quote"><span class="rq-user">${esc(data.reply_user)}</span><span class="rq-text">${esc(preview)}</span></div>`;
+      }
+      inner += `<span class="user">${esc(data.user)}</span><span class="msg-text">${esc(data.text)}</span><span class="time">${time}</span>`;
+      if (data.id) {
+        inner += `<button class="reply-btn" title="Reply">↩</button>`;
+      }
+      div.innerHTML = inner;
+      if (data.id) {
+        div.querySelector('.reply-btn').addEventListener('click', () => setReply(data.id, data.user, data.text));
       }
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    // Load chat history
-    socket.on('history', (history) => {
-      history.forEach((data) => {
-        displayMessage(data);
-      });
+    socket.on('history', history => {
+      messagesDiv.innerHTML = '';
+      history.forEach(displayMessage);
+      fetchAnalytics();
     });
-
-    // Receive new messages
-    socket.on('message', (data) => {
+    socket.on('message', data => {
       displayMessage(data);
+      if (data.user !== 'System') fetchAnalytics();
     });
-
-    socket.on('userList', (users) => {
-      userListSpan.textContent = users.join(', ');
-    });
+    socket.on('userList', users => { userListSpan.textContent = users.join(', ') || '—'; });
 
     function sendMessage() {
-      if (input.value.trim()) {
-        socket.emit('message', input.value);
-        input.value = '';
-      }
+      const text = msgInput.value.trim();
+      if (!text) return;
+      socket.emit('message', { text, replying_to: replyingTo ? replyingTo.id : null });
+      msgInput.value = '';
+      clearReply();
+    }
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+    // ══════════════════════════════════════════
+    //  LIVE DATA FETCHING
+    // ══════════════════════════════════════════
+
+    async function fetchConfig() {
+      try {
+        const data = await fetch('/config').then(r => r.json());
+        ALTERNATIVES = data.options;
+        // Update page title and panel label
+        document.title = data.topicDisplay + ' Chat';
+        document.getElementById('altPanelTitle').textContent =
+          data.topicDisplay + ' — Alternatives';
+        defaultRoom = data.defaultRoom;
+        if (!roomInput.value) roomInput.value = data.defaultRoom;
+        roomInput.placeholder = data.defaultRoom;
+        renderAlternatives();
+        renderStandings();
+        if (p5inst) p5inst.redraw();
+      } catch (e) { console.warn('fetchConfig failed', e); }
     }
 
-    sendBtn.onclick = sendMessage;
-    input.onkeypress = (e) => {
-      if (e.key === 'Enter') sendMessage();
-    };
+    async function fetchRooms() {
+      try {
+        const rooms = await fetch('/rooms').then(r => r.json());
+        const wrap   = document.getElementById('recentRoomsWrap');
+        const select = document.getElementById('recentRoomsSelect');
+        if (!rooms.length) return;
+
+        select.innerHTML = '<option value="" disabled selected>— pick a room —</option>' +
+          rooms.map(r =>
+            `<option value="${esc(r.name)}">${esc(r.name)}&nbsp;&nbsp;(${r.messageCount} msg)</option>`
+          ).join('');
+
+        wrap.style.display = 'block';
+      } catch (e) { console.warn('fetchRooms failed', e); }
+    }
+
+    document.getElementById('recentRoomsSelect').addEventListener('change', function () {
+      const roomInput = document.getElementById('roomInput');
+      if (this.value) {
+        roomInput.value = this.value;
+        roomHint.textContent = '';
+      }
+    });
+
+    async function fetchAnalytics() {
+      if (!ALTERNATIVES.length) return;
+      try {
+        const data = await fetch('/analytics').then(r => r.json());
+        SCORES = data.scores;
+        EDGES  = data.edges;
+        ASPECTS = data.aspects;
+        renderStandings();
+        renderAspects();
+        if (p5inst) p5inst.redraw();
+      } catch (e) { console.warn('fetchAnalytics failed', e); }
+    }
+
+    // ── Init ──
+    fetchConfig().then(() => fetchAnalytics());
+    fetchRooms();
   </script>
 </body>
 </html>
