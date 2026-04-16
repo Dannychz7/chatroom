@@ -36,11 +36,10 @@ A simple, lightweight chat room application supporting up to 20 concurrent users
     - [x] the CSV should have the 10 users, 3 to 4 responses each, 3, 4, 5 options, choose whichever data set looks best
 
 ## BUGS:
-⚠️ Python: Traceback (most recent call last):
-  File "/opt/render/project/src/extract.py", line 22, in <module>
-    raise ValueError("CRITICAL: 'pref-llm-key' not found. Check your .env file!")
-ValueError: CRITICAL: 'pref-llm-key' not found. Check your .env file!
-[aspects] msg 45 → LLM returned: []
+ - [] Message in this event triger this user connect thing, that make input complelty blank?
+        - [aspects] msg 45 → calling LLM: "I like greek and chinese food..."
+          [aspects] msg 45 → LLM returned: []
+          User connected
 ## Quick Start (Local Development)
 
 ### Prerequisites
