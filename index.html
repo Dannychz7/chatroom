@@ -400,7 +400,7 @@
   <!-- Join Modal -->
   <div id="joinModal">
     <div class="join-box">
-      <h2>💬 Join Chat</h2>
+      <h2> Join Chat</h2>
       <label for="usernameInput">Your Name</label>
       <input type="text" id="usernameInput" placeholder="e.g. Alice" autocomplete="off" />
       <label for="roomInput">Room</label>
@@ -419,7 +419,7 @@
   <!-- ── Left: Chat ── -->
   <div id="chatPanel">
     <div class="chat-header">
-      <h1 id="roomTitle">💬 Chat Room</h1>
+      <h1 id="roomTitle"> Chat Room</h1>
       <div class="chat-header-sub">
         <span>Room: <strong id="roomLabel">—</strong></span>
         <span>Online: <span id="userList">—</span></span>
@@ -537,136 +537,7 @@
       }).join('');
     }
 
-    // ══════════════════════════════════════════
-    //  COMPARISON GRAPH
-    // ══════════════════════════════════════════
-    // const canvas = document.getElementById('graphCanvas');
-    // const ctx = canvas.getContext('2d');
-
-    // function resizeCanvas() {
-    //   const panel = document.getElementById('graphPanel');
-    //   const titleH = panel.querySelector('.panel-title').offsetHeight + 14;
-    //   canvas.width  = panel.clientWidth  - 36;   // padding 18*2
-    //   canvas.height = panel.clientHeight - titleH - 14;
-    //   drawGraph();
-    // }
-
-    // function nodePositions() {
-    //   const n = ALTERNATIVES.length;
-    //   const cx = canvas.width  / 2;
-    //   const cy = canvas.height / 2;
-    //   const r  = Math.min(cx, cy) * 0.62;
-    //   return ALTERNATIVES.map((alt, i) => {
-    //     const angle = (2 * Math.PI * i / n) - Math.PI / 2;
-    //     return {
-    //       ...alt,
-    //       x: cx + r * Math.cos(angle),
-    //       y: cy + r * Math.sin(angle),
-    //       score: SCORES[alt.id] ?? 0
-    //     };
-    //   });
-    // }
-
-    // function drawGraph() {
-    //   if (!canvas.width || !canvas.height) return;
-    //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    //   const nodes = nodePositions();
-    //   const byId  = Object.fromEntries(nodes.map(n => [n.id, n]));
-
-    //   // Draw edges first (behind nodes)
-    //   EDGES.forEach(edge => {
-    //     const src = byId[edge.a];
-    //     const dst = byId[edge.b];
-    //     if (!src || !dst) return;
-
-    //     const alpha = Math.min(0.2 + edge.weight * 0.15, 0.85);
-    //     const lw    = 1 + edge.weight * 0.5;
-
-    //     ctx.beginPath();
-    //     ctx.moveTo(src.x, src.y);
-    //     ctx.lineTo(dst.x, dst.y);
-    //     ctx.strokeStyle = `rgba(91,156,246,${alpha})`;
-    //     ctx.lineWidth = lw;
-    //     ctx.stroke();
-
-    //     // Weight label at midpoint
-    //     const mx = (src.x + dst.x) / 2;
-    //     const my = (src.y + dst.y) / 2;
-    //     ctx.fillStyle = `rgba(91,156,246,${alpha})`;
-    //     ctx.font = '10px system-ui';
-    //     ctx.textAlign = 'center';
-    //     ctx.textBaseline = 'middle';
-    //     if (edge.weight > 1) ctx.fillText(`×${edge.weight}`, mx, my);
-    //   });
-
-    //   // Draw node glow + circle
-    //   const nodeR = Math.max(20, Math.min(canvas.width, canvas.height) * 0.06);
-    //   nodes.forEach(node => {
-    //     // Glow
-    //     const grd = ctx.createRadialGradient(node.x, node.y, nodeR * 0.5, node.x, node.y, nodeR * 1.6);
-    //     grd.addColorStop(0, node.color + '33');
-    //     grd.addColorStop(1, 'transparent');
-    //     ctx.beginPath();
-    //     ctx.arc(node.x, node.y, nodeR * 1.6, 0, 2 * Math.PI);
-    //     ctx.fillStyle = grd;
-    //     ctx.fill();
-
-    //     // Circle fill
-    //     ctx.beginPath();
-    //     ctx.arc(node.x, node.y, nodeR, 0, 2 * Math.PI);
-    //     ctx.fillStyle = '#1e2128';
-    //     ctx.fill();
-    //     ctx.strokeStyle = node.color;
-    //     ctx.lineWidth = 2;
-    //     ctx.stroke();
-
-    //     // ID letter
-    //     ctx.fillStyle = node.color;
-    //     ctx.font = `bold ${Math.round(nodeR * 0.65)}px system-ui`;
-    //     ctx.textAlign = 'center';
-    //     ctx.textBaseline = 'middle';
-    //     ctx.fillText(node.id, node.x, node.y);
-
-    //     // Label below node
-    //     const labelY = node.y + nodeR + 13;
-    //     ctx.fillStyle = '#a8b9cc';
-    //     ctx.font = `${Math.round(nodeR * 0.45)}px system-ui`;
-    //     ctx.textAlign = 'center';
-    //     ctx.textBaseline = 'top';
-    //     ctx.fillText(node.label, node.x, labelY);
-
-    //     // Score badge (top-right of node)
-    //     const s = node.score;
-    //     const scoreStr = s > 0 ? `+${s}` : `${s}`;
-    //     const badgeX = node.x + nodeR * 0.72;
-    //     const badgeY = node.y - nodeR * 0.72;
-    //     ctx.beginPath();
-    //     ctx.arc(badgeX, badgeY, nodeR * 0.38, 0, 2 * Math.PI);
-    //     ctx.fillStyle = s > 0 ? '#1a3d2a' : s < 0 ? '#3d1a1a' : '#2a2a3d';
-    //     ctx.fill();
-    //     ctx.strokeStyle = scoreColor(s);
-    //     ctx.lineWidth = 1;
-    //     ctx.stroke();
-    //     ctx.fillStyle = scoreColor(s);
-    //     ctx.font = `bold ${Math.round(nodeR * 0.32)}px system-ui`;
-    //     ctx.textAlign = 'center';
-    //     ctx.textBaseline = 'middle';
-    //     ctx.fillText(scoreStr, badgeX, badgeY);
-    //   });
-    // }
-
-    // function scoreColor(s) {
-    //   if (s > 0) return '#5bf6a0';
-    //   if (s < 0) return '#f6875b';
-    //   return '#6b7a8d';
-    // }
-
-    // // Resize canvas whenever the panel size changes
-    // const ro = new ResizeObserver(resizeCanvas);
-    // ro.observe(document.getElementById('graphPanel'));
-
-    // ══════════════════════════════════════════
+// ══════════════════════════════════════════
 //  COMPARISON GRAPH — p5.js
 // ══════════════════════════════════════════
 const graphPanel = document.getElementById('graphPanel');
@@ -695,18 +566,6 @@ const sketch = (p) => {
       };
     });
   }
-
-  // p.setup = () => {
-  //   const titleH = graphPanel.querySelector('.panel-title').offsetHeight + 14;
-  //   const w = graphPanel.clientWidth  - 36;
-  //   const h = graphPanel.clientHeight - titleH - 14;
-  //   const cnv = p.createCanvas(w, h);
-  //   cnv.parent('graphPanel');
-  //   // Remove default margin p5 adds
-  //   cnv.elt.style.display = 'block';
-  //   buildNodes();
-  //   p.noLoop(); // static — redraw() called on resize
-  // };
 
   p.setup = () => {
   const titleH = graphPanel.querySelector('.panel-title').offsetHeight + 14;
@@ -883,7 +742,7 @@ p5inst = new p5(sketch);
       saveLastRoom(username, room);
       joinModal.classList.add('hidden');
       roomLabel.textContent = room;
-      roomTitle.textContent = '💬 ' + room;
+      roomTitle.textContent = room;
       msgInput.disabled = false;
       sendBtn.disabled = false;
       msgInput.focus();

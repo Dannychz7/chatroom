@@ -189,11 +189,12 @@ io.on('connection', (socket) => {
 
 // Middleware to check API key
 function requireApiKey(req, res, next) {
-  const apiKey = req.query.key || req.headers['x-api-key'];
-  const validKey = process.env.API_KEY || 'your-secret-key-here';
+  const apiKey = req.headers['x-api-key'];
+  const validKey = process.env.API_KEY;
+  if (!validKey) throw new Error('API_KEY env var is not set');
 
-  console.log('Provided:', apiKey);
-  console.log('Expected:', validKey);
+  // console.log('Provided:', apiKey);
+  // console.log('Expected:', validKey);
 
   if (apiKey === validKey) {
     next();
@@ -210,12 +211,17 @@ app.get('/export/json', requireApiKey, (req, res) => {
   res.json(messages);
 });
 
+function sanitizeCsvCell(val) {
+  const s = String(val ?? '');
+  return /^[=+\-@]/.test(s) ? `'${s}` : s;
+}
+
 app.get('/export/csv', requireApiKey, (req, res) => {
   const messages = db.prepare('SELECT * FROM messages ORDER BY id ASC').all();
   const csv = [
     'ID,Username,Message,Room,ReplyingTo,Timestamp',
     ...messages.map(m =>
-      `${m.id},"${m.username}","${m.message.replace(/"/g, '""')}","${m.room_id || 'general'}","${m.replying_to || ''}","${m.timestamp}"`
+      `${m.id},"${sanitizeCsvCell(m.username)}","${sanitizeCsvCell(m.message).replace(/"/g, '""')}","${m.room_id || 'general'}","${m.replying_to || ''}","${m.timestamp}"`
     )
   ].join('\n');
 
